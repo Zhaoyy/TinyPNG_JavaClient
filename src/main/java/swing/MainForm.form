@@ -36,8 +36,9 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <enabled value="false"/>
+              <enabled value="true"/>
               <font size="14"/>
+              <margin top="4" left="0" bottom="0" right="0"/>
             </properties>
           </component>
           <component id="d0016" class="javax.swing.JButton" binding="btnCompress">

@@ -1,3 +1,4 @@
+import com.tinify.Tinify;
 import swing.MainForm;
 
 /**
@@ -12,6 +13,7 @@ public class Main {
   private static String TAG = "Main";
 
   public static void main(String args[]) {
+    Tinify.setKey("test");
     new MainForm().invokeJFram();
   }
 }

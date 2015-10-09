@@ -1,5 +1,6 @@
 package swing;
 
+import com.tinify.Tinify;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -48,6 +49,7 @@ public class MainForm {
     setWindowStyle();
     jFrame = new JFrame("test");
     jFrame.setContentPane(root);
+    tfPath.setText(Tinify.key());
     addMenu2Fram();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -95,11 +97,11 @@ public class MainForm {
     try {
 
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"); // Windows风格
+      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"); // Windows椋庢牸
 
-      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel") ; // Mac风格
+      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel") ; // Mac椋庢牸
 
-      //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel") ; // Java默认风格
+      //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel") ; // Java榛樿椋庢牸
 
     } catch (ClassNotFoundException ex) {
       ex.printStackTrace();
