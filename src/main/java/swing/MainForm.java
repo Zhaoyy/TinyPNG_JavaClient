@@ -1,14 +1,22 @@
 package swing;
 
-import com.tinify.Tinify;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -19,8 +27,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 /**
@@ -30,12 +36,12 @@ import javax.swing.WindowConstants;
  *         DATE: 2015/10/9
  *         DESC:
  **/
-public class MainForm {
+public class MainForm implements ActionListener {
 
   private static String TAG = "MainForm";
   private static final int FRAME_WIDTH = 600;
   private static final int FRAME_HEIGHT = 400;
-  private JButton btnSelect;
+  private JButton btnSelectDir;
   private JPanel root;
   private JTextField tfPath;
   private JList list;
@@ -43,19 +49,49 @@ public class MainForm {
   private JButton btnClear;
   private JLabel lblStatus;
 
+  private JFileChooser jFileChooser;
+
   private JFrame jFrame;
 
+  private void bindActionListener() {
+    btnSelectDir.addActionListener(this);
+    new DropTarget(list, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
+      @Override public void drop(DropTargetDropEvent dtde) {
+        try {
+          if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor))//如果拖入的文件格式受支持
+          {
+            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);//接收拖拽来的数据
+            List<File> list = (List<File>) (dtde.getTransferable()
+                .getTransferData(DataFlavor.javaFileListFlavor));
+            for (File file : list) {
+              if (file.isDirectory()) {
+                selectDirs(file);
+              } else {
+                setlectFiles(file);
+              }
+            }
+            dtde.dropComplete(true);//指示拖拽操作已完成
+          } else {
+            dtde.rejectDrop();//否则拒绝拖拽来的数据
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }, true);
+  }
+
   public void invokeJFram() {
-    setWindowStyle();
+
     jFrame = new JFrame("test");
     jFrame.setContentPane(root);
-    tfPath.setText(Tinify.key());
     addMenu2Fram();
+    bindActionListener();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension dimension = toolkit.getScreenSize();
-
+        // center in screen
         jFrame.setLocation((dimension.width - FRAME_WIDTH) / 2,
             (dimension.height - FRAME_HEIGHT) / 2);
         jFrame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
@@ -75,7 +111,9 @@ public class MainForm {
 
   private void addMenu2Fram() {
     JMenuBar menuBar = new JMenuBar();
-    JMenu setting = new JMenu("Setting");
+    JMenu setting = new JMenu("设置");
+
+    setting.setMargin(new Insets(8, 8, 8, 8));
     setting.setMnemonic(KeyEvent.VK_S);
     JMenuItem addKey = new JMenuItem("Add key", KeyEvent.VK_K);
     setting.add(addKey);
@@ -93,24 +131,44 @@ public class MainForm {
     jFrame.setJMenuBar(menuBar);
   }
 
-  private void setWindowStyle() {
-    try {
-
-      UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"); // Windows风格
-
-      //UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel") ; // Mac风格
-
-      //UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel") ; // Java默认风格
-
-    } catch (ClassNotFoundException ex) {
-      ex.printStackTrace();
-    } catch (InstantiationException ex) {
-      ex.printStackTrace();
-    } catch (IllegalAccessException ex) {
-      ex.printStackTrace();
-    } catch (UnsupportedLookAndFeelException ex) {
-      ex.printStackTrace();
+  private JFileChooser getJFileChooser() {
+    if (jFileChooser == null) {
+      jFileChooser = new JFileChooser();
     }
+    return jFileChooser;
+  }
+
+  @Override public void actionPerformed(ActionEvent e) {
+    if (btnSelectDir == e.getSource()) {
+      JFileChooser fileChooser = getJFileChooser();
+      fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+      fileChooser.setMultiSelectionEnabled(true);
+      int result = fileChooser.showOpenDialog(jFrame);
+
+      switch (result) {
+        case JFileChooser.APPROVE_OPTION:
+          File[] dirs = fileChooser.getSelectedFiles();
+          selectDirs(dirs);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  private void selectDirs(File... dirs) {
+    StringBuilder sb = new StringBuilder("  ");
+    for (File dir : dirs) {
+      sb.append(dir.getName() + File.separator + ";");
+    }
+    tfPath.setText(sb.toString());
+  }
+
+  private void setlectFiles(File... files) {
+    StringBuilder sb = new StringBuilder("  ");
+    for (File dir : files) {
+      sb.append(dir.getName() + ";");
+    }
+    tfPath.setText(sb.toString());
   }
 }
