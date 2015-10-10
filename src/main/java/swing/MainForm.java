@@ -16,15 +16,16 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -44,10 +45,11 @@ public class MainForm implements ActionListener {
   private JButton btnSelectDir;
   private JPanel root;
   private JTextField tfPath;
-  private JList list;
   private JButton btnCompress;
   private JButton btnClear;
   private JLabel lblStatus;
+  private JTable table;
+  private JCheckBox chbAll;
 
   private JFileChooser jFileChooser;
 
@@ -55,7 +57,7 @@ public class MainForm implements ActionListener {
 
   private void bindActionListener() {
     btnSelectDir.addActionListener(this);
-    new DropTarget(list, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
+    new DropTarget(table, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
       @Override public void drop(DropTargetDropEvent dtde) {
         try {
           if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor))//如果拖入的文件格式受支持
