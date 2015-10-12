@@ -1,5 +1,6 @@
 package swing;
 
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -11,6 +12,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -30,6 +33,8 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import tinify.MySource;
 
 /**
@@ -52,8 +57,15 @@ public class MainForm implements ActionListener {
   private JLabel lblStatus;
   private JTable table;
   private JCheckBox chbAll;
+  private DefaultTableModel model;
+  private int oldDataCount = 0;
 
   private JFileChooser jFileChooser;
+  private Object[] headers = new Object[] {
+      "select", "Name", "status"
+  };
+
+  private Object[][] content = new Object[0][3];
 
   private JFrame jFrame;
   private List<MySource> mySources = new ArrayList<MySource>();
@@ -69,6 +81,7 @@ public class MainForm implements ActionListener {
             dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);//接收拖拽来的数据
             List<File> list = (List<File>) (dtde.getTransferable()
                 .getTransferData(DataFlavor.javaFileListFlavor));
+            oldDataCount = mySources.size();
             for (File file : list) {
               if (file.isDirectory()) {
                 setlectFiles(file.listFiles());
@@ -80,6 +93,7 @@ public class MainForm implements ActionListener {
           } else {
             dtde.rejectDrop();//否则拒绝拖拽来的数据
           }
+          bindData2JTable();
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -92,6 +106,7 @@ public class MainForm implements ActionListener {
     jFrame = new JFrame("test");
     jFrame.setContentPane(root);
     addMenu2Fram();
+    initUIView();
     bindActionListener();
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
@@ -144,6 +159,39 @@ public class MainForm implements ActionListener {
     return jFileChooser;
   }
 
+  private void initUIView() {
+    model = new DefaultTableModel(content, headers) {
+      @Override public Class getColumnClass(int c) {
+        Object value = getValueAt(0, c);
+        if (value != null) {
+          return value.getClass();
+        } else {
+          return super.getClass();
+        }
+      }
+
+      @Override public boolean isCellEditable(int row, int column) {
+        return false;
+      }
+    };
+    table.setModel(model);
+    final MyCheckBoxRenderer check = new MyCheckBoxRenderer();
+    table.getTableHeader().getColumnModel().getColumn(0).setCellRenderer(check);
+    table.setRowHeight(30);
+    table.getTableHeader().addMouseListener(new MouseAdapter() {
+      @Override public void mouseClicked(MouseEvent e) {
+        if (table.getColumnModel().getColumnIndexAtX(e.getX()) == 0) {//如果点击的是第0列，即checkbox这一列
+          boolean b = !check.isSelected();
+          check.setSelected(b);
+          table.getTableHeader().repaint();
+          for (int i = 0; i < table.getRowCount(); i++) {
+            table.getModel().setValueAt(b, i, 0);//把这一列都设成和表头一样
+          }
+        }
+      }
+    });
+  }
+
   @Override public void actionPerformed(ActionEvent e) {
     if (btnSelectDir == e.getSource()) {
       JFileChooser fileChooser = getJFileChooser();
@@ -154,13 +202,16 @@ public class MainForm implements ActionListener {
       switch (result) {
         case JFileChooser.APPROVE_OPTION:
           File[] dirs = fileChooser.getSelectedFiles();
+          oldDataCount = mySources.size();
           selectDirs(dirs);
+          bindData2JTable();
           break;
         default:
           break;
       }
     } else if (btnClear == e.getSource()) {
       mySources.clear();
+      bindData2JTable();
     }
   }
 
@@ -184,7 +235,61 @@ public class MainForm implements ActionListener {
   }
 
   private void bindData2JTable() {
+    content = new Object[mySources.size()][3];
 
+    for (int i = 0; i < mySources.size(); i++) {
+      MySource source = mySources.get(i);
+      Object[] c = new Object[] { true, source.getSourcePath(), getStatus(source.getStatus()) };
+      content[i] = c;
+    }
+
+    model.setDataVector(content, headers);
+    fireTableRowsChanged(oldDataCount, content.length);
   }
 
+  private String getStatus(int status) {
+    switch (status) {
+      case -1:
+        return "无效文件";
+      case 0:
+        return "准备压缩";
+      case 1:
+        return "上传完成";
+      case 2:
+        return "下载完成";
+
+      default:
+        return "";
+    }
+  }
+
+  public void fireTableRowsChanged(int oldCount, int newCount) {
+    if (newCount == 0 && oldCount == 0) {
+    } else if (newCount == 0 && oldCount > 0) {
+      model.fireTableRowsDeleted(0, oldCount - 1);
+    } else if (newCount > 0 && oldCount == 0) {
+      model.fireTableRowsInserted(0, newCount - 1);
+    } else if (newCount == oldCount) {
+      model.fireTableRowsUpdated(0, newCount - 1);
+    } else if (newCount > oldCount) {
+      model.fireTableRowsInserted(oldCount, newCount - 1);
+      model.fireTableRowsUpdated(0, oldCount - 1);
+    } else {
+      model.fireTableRowsDeleted(newCount, oldCount - 1);
+      model.fireTableRowsUpdated(0, newCount - 1);
+    }
+  }
+
+  class MyCheckBoxRenderer extends JCheckBox implements TableCellRenderer {
+
+    public MyCheckBoxRenderer() {
+      this.setBorderPainted(true);
+    }
+
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+        boolean hasFocus, int row, int column) {
+      return this;
+    }
+  }
 }
