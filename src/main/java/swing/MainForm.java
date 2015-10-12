@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -29,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import tinify.MySource;
 
 /**
  * MainForm
@@ -54,9 +56,11 @@ public class MainForm implements ActionListener {
   private JFileChooser jFileChooser;
 
   private JFrame jFrame;
+  private List<MySource> mySources = new ArrayList<MySource>();
 
   private void bindActionListener() {
     btnSelectDir.addActionListener(this);
+    btnClear.addActionListener(this);
     new DropTarget(table, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
       @Override public void drop(DropTargetDropEvent dtde) {
         try {
@@ -67,7 +71,7 @@ public class MainForm implements ActionListener {
                 .getTransferData(DataFlavor.javaFileListFlavor));
             for (File file : list) {
               if (file.isDirectory()) {
-                selectDirs(file);
+                setlectFiles(file.listFiles());
               } else {
                 setlectFiles(file);
               }
@@ -155,6 +159,8 @@ public class MainForm implements ActionListener {
         default:
           break;
       }
+    } else if (btnClear == e.getSource()) {
+      mySources.clear();
     }
   }
 
@@ -162,15 +168,23 @@ public class MainForm implements ActionListener {
     StringBuilder sb = new StringBuilder("  ");
     for (File dir : dirs) {
       sb.append(dir.getName() + File.separator + ";");
+      setlectFiles(dir.listFiles());
     }
     tfPath.setText(sb.toString());
   }
 
   private void setlectFiles(File... files) {
-    StringBuilder sb = new StringBuilder("  ");
-    for (File dir : files) {
-      sb.append(dir.getName() + ";");
+    for (File file : files) {
+      String filePath = file.getAbsolutePath();
+      if (filePath.endsWith(".png") || filePath.endsWith(".jpg")) {
+        MySource mySource = new MySource(filePath, filePath);
+        mySources.add(mySource);
+      }
     }
-    tfPath.setText(sb.toString());
   }
+
+  private void bindData2JTable() {
+
+  }
+
 }

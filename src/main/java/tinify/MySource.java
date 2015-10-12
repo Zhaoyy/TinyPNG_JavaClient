@@ -49,9 +49,9 @@ public class MySource {
 
   private String url;
   private Options options = null;
+  private int status = 0; // 0-准备好，1-上传完成，2-下载完成, -1-非法文件
 
-  public MySource(boolean selected, String sourcePath, String outPath) {
-    this.selected = selected;
+  public MySource(String sourcePath, String outPath) {
     this.sourcePath = sourcePath;
     this.outPath = outPath;
   }
@@ -80,6 +80,10 @@ public class MySource {
     this.outPath = outPath;
   }
 
+  public int getStatus() {
+    return status;
+  }
+
   public boolean isAllowed() {
     return sourcePath.endsWith(".png")
         || sourcePath.endsWith(".jpg")
@@ -96,10 +100,17 @@ public class MySource {
   }
 
   public String update2GetDownloadUrl() throws IOException {
-    Response response = Tinify.client()
-        .request(Client.Method.POST, "/shrink", Files.readAllBytes(Paths.get(sourcePath)));
 
-    url = response.header("Location");
+    if (!isAllowed()) {
+      status = -1;
+      url = null;
+    } else {
+      Response response = Tinify.client()
+          .request(Client.Method.POST, "/shrink", Files.readAllBytes(Paths.get(sourcePath)));
+      url = response.header("Location");
+      status = 1;
+    }
+
     return url;
   }
 
@@ -124,5 +135,6 @@ public class MySource {
       response = Tinify.client().request(Client.Method.POST, url, options);
     }
     Files.write(Paths.get(outPath), response.body().bytes());
+    status = 2;
   }
 }

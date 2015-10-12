@@ -103,6 +103,7 @@
               <component id="76b0c" class="javax.swing.JTable" binding="table">
                 <constraints/>
                 <properties>
+                  <autoCreateRowSorter value="false"/>
                   <showHorizontalLines value="false"/>
                   <showVerticalLines value="false"/>
                 </properties>
