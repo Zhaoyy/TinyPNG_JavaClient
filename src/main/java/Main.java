@@ -1,5 +1,4 @@
 import com.tinify.Tinify;
-import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -8,6 +7,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.FontUIResource;
 import swing.MainForm;
 import utils.PropertiesUtil;
+import utils.SwingUtil;
 
 /**
  * Main
@@ -19,9 +19,16 @@ import utils.PropertiesUtil;
 public class Main {
 
   private static String TAG = "Main";
-  private static String WORK_DIR = "d:" + File.separator;
+  public static String WORK_DIR = "d:" + File.separator + "out" + File.separator;
 
   public static void main(String args[]) {
+
+    File outDir = new File(WORK_DIR);
+
+    if (!outDir.exists()) {
+      outDir.mkdirs();
+    }
+
     Tinify.setKey("vPhKEx0a6_UZN1Aylky_Lz59m3uUDH38");
     try {
       PropertiesUtil.writePropertiesVal("key", Tinify.key());
@@ -30,24 +37,19 @@ public class Main {
     }
     setWindowGlobalSetting();
     new MainForm().invokeJFram();
-    //try {
-    //  Source source = Tinify.fromFile(WORK_DIR + "logo.png");
-    //  source.toFile(WORK_DIR + "out.png");
-    //} catch (IOException e) {
-    //  e.printStackTrace();
-    //}
   }
 
   private static void setWindowGlobalSetting() {
     try {
 
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-      FontUIResource fontUIResource = new FontUIResource(new Font("新宋体", Font.PLAIN, 14));
+      FontUIResource fontUIResource = new FontUIResource(SwingUtil.font);
       for (Enumeration keys = UIManager.getDefaults().keys(); keys.hasMoreElements(); ) {
         Object key = keys.nextElement();
         Object value = UIManager.get(key);
         if (value instanceof FontUIResource) {
           UIManager.put(key, fontUIResource);
+          break;
         }
       }
     } catch (ClassNotFoundException ex) {

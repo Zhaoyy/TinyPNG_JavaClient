@@ -23,7 +23,7 @@ public class ControlTest {
 
   @Before public void setup() {
     Tinify.setKey("vPhKEx0a6_UZN1Aylky_Lz59m3uUDH38");
-    mySource = new MySource(testDir + FileName, testDir + "out.png");
+    mySource = new MySource(0, testDir + FileName, testDir + "out.png");
   }
 
   @Test public void testUrl() {

@@ -49,11 +49,22 @@ public class MySource {
 
   private String url;
   private Options options = null;
-  private int status = 0; // 0-准备好，1-上传完成，2-下载完成, -1-非法文件
+  private int status = 0; // 0-等待开始，1-准备好，2-上传完成, 3-下载完成, -1-非法文件
+  private int index;
+  private long sourceSize;
+  private long outSize;
 
-  public MySource(String sourcePath, String outPath) {
+  private static StateUpdateListenner listenner;
+
+  public static void setListenner(StateUpdateListenner listenner) {
+    MySource.listenner = listenner;
+  }
+
+  public MySource(int index, String sourcePath, String outDir) {
+    this.index = index;
     this.sourcePath = sourcePath;
-    this.outPath = outPath;
+    this.outPath = outDir + getFileName();
+    this.sourceSize = getFileSize(sourcePath);
   }
 
   public boolean isSelected() {
@@ -66,6 +77,34 @@ public class MySource {
 
   public String getSourcePath() {
     return sourcePath;
+  }
+
+  public int getIndex() {
+    return index;
+  }
+
+  public void setIndex(int index) {
+    this.index = index;
+  }
+
+  public long getSourceSize() {
+    return sourceSize;
+  }
+
+  public void setSourceSize(long sourceSize) {
+    this.sourceSize = sourceSize;
+  }
+
+  public long getOutSize() {
+    return outSize;
+  }
+
+  public void setOutSize(long outSize) {
+    this.outSize = outSize;
+  }
+
+  public String getFileName() {
+    return sourcePath.substring(sourcePath.lastIndexOf(File.separator) + 1, sourcePath.length());
   }
 
   public void setSourcePath(String sourcePath) {
@@ -108,7 +147,11 @@ public class MySource {
       Response response = Tinify.client()
           .request(Client.Method.POST, "/shrink", Files.readAllBytes(Paths.get(sourcePath)));
       url = response.header("Location");
-      status = 1;
+      status = 2;
+    }
+
+    if (listenner != null) {
+      listenner.update(index);
     }
 
     return url;
@@ -135,6 +178,34 @@ public class MySource {
       response = Tinify.client().request(Client.Method.POST, url, options);
     }
     Files.write(Paths.get(outPath), response.body().bytes());
-    status = 2;
+    status = 3;
+
+    outSize = getFileSize(outPath);
+    if (listenner != null) {
+      listenner.update(index);
+    }
+  }
+
+  public String getCompressPercent() {
+    return String.format("%.2f%%", outSize * 1.0 / sourceSize * 100);
+  }
+
+  public Runnable getCompressThread() throws IOException {
+
+    status = 1;
+    return new Runnable() {
+      @Override public void run() {
+        try {
+          update2GetDownloadUrl();
+          getOutFileByUrl();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    };
+  }
+
+  public interface StateUpdateListenner {
+    void update(int index);
   }
 }
