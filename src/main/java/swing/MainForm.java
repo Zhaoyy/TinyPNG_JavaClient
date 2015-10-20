@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -51,10 +53,8 @@ import utils.SwingUtil;
  **/
 public class MainForm implements ActionListener {
 
-  private static String TAG = "MainForm";
   private static final int FRAME_WIDTH = 600;
   private static final int FRAME_HEIGHT = 400;
-  public static String WORK_DIR = "d:" + File.separator + "out" + File.separator;
   private JButton btnSelectDir;
   private JPanel root;
   private JTextField tfPath;
@@ -113,6 +113,16 @@ public class MainForm implements ActionListener {
       }
     });
 
+    table.addMouseListener(new MouseAdapter() {
+      @Override public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 1) {
+          int index = ((JTable) e.getSource()).rowAtPoint(e.getPoint());
+
+          setItemCheckedOrNot(index, !mySources.get(index).isSelected());
+        }
+      }
+    });
+
     MySource.setListenner(new MySource.StateUpdateListenner() {
       @Override public void update(int index) {
         updateItem(index, mySources.get(index));
@@ -125,7 +135,7 @@ public class MainForm implements ActionListener {
     initHeader();
     jFrame = new JFrame("TinyPNG Client");
     jFrame.setContentPane(root);
-    addMenu2Frame();
+    //addMenu2Frame();
     initUIView();
     bindActionListener();
     SwingUtilities.invokeLater(new Runnable() {
@@ -167,11 +177,7 @@ public class MainForm implements ActionListener {
     JMenuItem addKey = new JMenuItem("Add key", KeyEvent.VK_K);
     setting.add(addKey);
 
-    JMenu second = new JMenu("Second");
-    //second.add(addKey);
-
     menuBar.add(setting);
-    menuBar.add(second);
     addKey.addActionListener(new ActionListener() {
       @Override public void actionPerformed(ActionEvent e) {
         JOptionPane.showMessageDialog(jFrame, "add key clicked!");
@@ -227,9 +233,13 @@ public class MainForm implements ActionListener {
     table.getTableHeader().repaint();
 
     for (int i = 0; i < table.getRowCount(); i++) {
-      mySources.get(i).setSelected(check);
-      table.getModel().setValueAt(check, i, 0);
+      setItemCheckedOrNot(i, check);
     }
+  }
+
+  private void setItemCheckedOrNot(int index, boolean check) {
+    mySources.get(index).setSelected(check);
+    table.getModel().setValueAt(check, index, 0);
   }
 
   @Override public void actionPerformed(ActionEvent e) {
@@ -279,7 +289,7 @@ public class MainForm implements ActionListener {
     for (File file : files) {
       String filePath = file.getAbsolutePath();
       if (filePath.endsWith(".png") || filePath.endsWith(".jpg")) {
-        MySource mySource = new MySource(index, filePath, WORK_DIR);
+        MySource mySource = new MySource(index, filePath);
         mySources.add(mySource);
         index++;
       }
@@ -334,9 +344,10 @@ public class MainForm implements ActionListener {
 
     model.setDataVector(data, headers);
     fireTableRowsChanged(lastCount, nowCount);
+    int firstWidth = SwingUtil.getStringWidth(headers.get(0).toString()) + 10;
     table.getColumnModel()
-        .getColumn(0)
-        .setMaxWidth(SwingUtil.getStringWidth(headers.get(0).toString()) + 10);
+        .getColumn(0).setMaxWidth(firstWidth);
+
   }
 
   private String getStatus(MySource mySource) {

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import utils.PropertiesUtil;
 import utils.StringUtil;
 
 /**
@@ -60,10 +61,9 @@ public class MySource {
     MySource.listenner = listenner;
   }
 
-  public MySource(int index, String sourcePath, String outDir) {
+  public MySource(int index, String sourcePath) {
     this.index = index;
     this.sourcePath = sourcePath;
-    this.outPath = outDir + getFileName();
     this.sourceSize = getFileSize(sourcePath);
   }
 
@@ -170,6 +170,16 @@ public class MySource {
     if (StringUtil.isNullOrEmpty(url)) {
       throw new NullPointerException("url is empty or null!");
     }
+
+    String out = PropertiesUtil.getPropertiesValue("out", "out");
+
+    File outFile = new File(out);
+
+    if (!outFile.exists() || outFile.isFile()) {
+      outFile.mkdirs();
+    }
+
+    outPath = out + File.separator + getFileName();
 
     Response response;
     if (options == null) {

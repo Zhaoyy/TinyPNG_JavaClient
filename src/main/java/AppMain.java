@@ -7,6 +7,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.FontUIResource;
 import swing.MainForm;
 import utils.PropertiesUtil;
+import utils.StringUtil;
 import utils.SwingUtil;
 
 /**
@@ -16,22 +17,19 @@ import utils.SwingUtil;
  *         DATE: 2015/10/9
  *         DESC:
  **/
-public class Main {
+public class AppMain {
 
-  private static String TAG = "Main";
-  public static String WORK_DIR = "d:" + File.separator + "out" + File.separator;
+  private static final String defaultKey = "vPhKEx0a6_UZN1Aylky_Lz59m3uUDH38";
+  private static final String defaultOutDir = "out";
+  private static final String KEY = "key";
+  private static final String OUT_DIR = "outDir";
 
   public static void main(String args[]) {
 
-    File outDir = new File(WORK_DIR);
+    initProperties();
 
-    if (!outDir.exists()) {
-      outDir.mkdirs();
-    }
-
-    Tinify.setKey("vPhKEx0a6_UZN1Aylky_Lz59m3uUDH38");
     try {
-      PropertiesUtil.writePropertiesVal("key", Tinify.key());
+      Tinify.setKey(PropertiesUtil.getPropertiesValue(KEY, defaultKey));
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -60,6 +58,24 @@ public class Main {
       ex.printStackTrace();
     } catch (UnsupportedLookAndFeelException ex) {
       ex.printStackTrace();
+    }
+  }
+
+  private static void initProperties() {
+    try {
+      String key = PropertiesUtil.getPropertiesValue(KEY, "");
+      if (StringUtil.isNullOrEmpty(key)) {
+        PropertiesUtil.writePropertiesVal(KEY, defaultKey);
+      }
+
+      String outDir = PropertiesUtil.getPropertiesValue(OUT_DIR, "");
+      if (StringUtil.isNullOrEmpty(outDir)) {
+        File file = new File(defaultOutDir);
+        file.mkdirs();
+        PropertiesUtil.writePropertiesVal(OUT_DIR, file.getAbsolutePath());
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 }
