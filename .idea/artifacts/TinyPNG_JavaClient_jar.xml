@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TinyPNG_JavaClient:jar">
+    <output-path>$PROJECT_DIR$/build/classes/artifacts/TinyPNG_JavaClient_jar</output-path>
+    <root id="archive" name="TinyPNG_JavaClient.jar">
+      <element id="module-output" name="TinyPNG_JavaClient" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.3.1/ecb6e1f8e4b0e84c4b886c2f14a1500caf309757/gson-2.3.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.5.0/4de2b4ed3445c37ec1720a7d214712e845a24636/okhttp-2.5.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio/1.6.0/98476622f10715998eacf9240d6b479f12c66143/okio-1.6.0.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.tinify/tinify/1.5.0/882a4c340f77756aa22b255f663f6eee15f6967/tinify-1.5.0.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

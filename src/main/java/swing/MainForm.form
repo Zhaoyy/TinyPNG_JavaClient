@@ -25,7 +25,7 @@
             <properties>
               <focusPainted value="false"/>
               <font/>
-              <text value="选择文件夹"/>
+              <text value="select dir"/>
             </properties>
           </component>
           <component id="ee3d7" class="javax.swing.JTextField" binding="tfPath">
@@ -39,7 +39,7 @@
               <enabled value="true"/>
               <font/>
               <margin top="4" left="0" bottom="0" right="0"/>
-              <text value="支持文件夹多选"/>
+              <text value="support multi directory"/>
             </properties>
           </component>
           <component id="d0016" class="javax.swing.JButton" binding="btnCompress">
@@ -49,7 +49,7 @@
             <properties>
               <focusPainted value="false"/>
               <font/>
-              <text value="压缩"/>
+              <text value="compress"/>
             </properties>
           </component>
           <component id="25fd2" class="javax.swing.JButton" binding="btnClear">
@@ -59,7 +59,7 @@
             <properties>
               <focusPainted value="false"/>
               <font/>
-              <text value="清除列表"/>
+              <text value="clear list"/>
             </properties>
           </component>
           <hspacer id="e0968">
@@ -73,7 +73,7 @@
             </constraints>
             <properties>
               <foreground color="-4510676"/>
-              <text value="单个文件可直接拖进下面的列表"/>
+              <text value="Drap a picture file in the list"/>
             </properties>
           </component>
           <hspacer id="919be">
